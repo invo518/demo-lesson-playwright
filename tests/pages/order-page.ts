@@ -1,7 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test'
-import {faker}     from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 import { SERVICE_URL } from '../../config/env-data'
-
 
 export class OrderPage {
   readonly page: Page
@@ -53,9 +52,9 @@ export class OrderPage {
     }
   }
 
-async statusButtonClick(): Promise<void> {
+  async statusButtonClick(): Promise<void> {
     await this.statusButton.click()
-  await expect(this.statusButton).toBeVisible()
-  await expect(this.orderTrack).toBeDisabled()
-}
+    await expect(this.statusButton).toBeVisible()
+    await expect(this.orderTrack).toBeDisabled()
+  }
 }
