@@ -1,39 +1,50 @@
 import { expect, Locator, Page } from '@playwright/test'
 import { faker } from '@faker-js/faker'
-import { SERVICE_URL } from '../../config/env-data'
+import { Button } from '../atoms/Button'
+import { Input } from '../atoms/Fields input'
+import { NotFoundPage } from './order-not found-page'
+import { OrderDetailsPage } from './order-details-page'
 
 export class OrderPage {
   readonly page: Page
   readonly title: Locator
-  readonly statusButton: Locator
-  readonly createOrderButt: Locator
-  readonly nameInput: Locator
-  readonly phoneInput: Locator
-  readonly commentInput: Locator
+  readonly statusButton: Button
+  readonly createOrderButt: Button
+  readonly nameInput: Input
+  readonly phoneInput: Input
+  readonly commentInput: Input
   readonly confirmationPopup: Locator
-  readonly logOutBut: Locator
+  readonly logOutBut: Button
   readonly orderTrack: Locator
+  //
+  protected readonly searchPopup: Locator
+  readonly searchInput: Locator
+  readonly searchButton: Button
 
   constructor(page: Page) {
     this.page = page
     this.title = page.locator('h2')
-    this.statusButton = page.getByTestId('openStatusPopup-button')
-    this.createOrderButt = page.getByTestId('createOrder-button')
-    this.nameInput = page.getByTestId('username-input')
-    this.phoneInput = page.getByTestId('phone-input')
-    this.commentInput = page.getByTestId('comment-input')
+    this.statusButton = new Button(page.getByTestId('openStatusPopup-button'))
+    this.createOrderButt = new Button(page.getByTestId('createOrder-button'))
+    this.nameInput = new Input(page.getByTestId('username-input'))
+    this.phoneInput = new Input(page.getByTestId('phone-input'))
+    this.commentInput = new Input(page.getByTestId('comment-input'))
     this.confirmationPopup = page.getByTestId('orderSuccessfullyCreated-popup')
-    this.logOutBut = page.getByTestId('logout-button')
+    this.logOutBut = new Button(page.getByTestId('logout-button'))
 
     this.orderTrack = page.getByTestId('searchOrder-popup')
+    //
+    this.searchPopup = page.getByTestId('searchOrder-popup')
+    this.searchInput = this.searchPopup.getByTestId('searchOrder-input')
+    this.searchButton = new Button(this.searchPopup.getByTestId('searchOrder-submitButton'))
   }
   async checkInnerComponents(): Promise<void> {
     await expect(this.title).toBeVisible()
-    await expect(this.statusButton).toBeVisible()
-    await expect(this.createOrderButt).toBeVisible()
-    await expect(this.nameInput).toBeVisible()
-    await expect(this.phoneInput).toBeVisible()
-    await expect(this.commentInput).toBeVisible()
+    await this.statusButton.checkVisible(true)
+    await this.createOrderButt.checkVisible(true)
+    await this.nameInput.beVisible()
+    await this.phoneInput.beVisible()
+    await this.commentInput.beVisible()
     await this.checkCreateOrderButtonEnabled(true)
     await expect(this.confirmationPopup).toBeVisible()
   }
@@ -44,17 +55,29 @@ export class OrderPage {
     await this.createOrderButt.click()
     await expect(this.confirmationPopup).toBeVisible()
   }
+  async checkOrderNotFound(): Promise<NotFoundPage> {
+    await this.statusButton.click()
+    await this.searchInput.fill('0')
+    await this.searchButton.click()
+    return new NotFoundPage(this.page)
+  }
+  async checkOrderFound(id: number): Promise<OrderDetailsPage> {
+    await this.statusButton.click()
+    await this.searchInput.fill(`${id}`)
+    await this.searchButton.click()
+    return new OrderDetailsPage(this.page)
+  }
   async checkCreateOrderButtonEnabled(enabled: boolean): Promise<void> {
     if (enabled) {
-      await expect(this.createOrderButt).toBeEnabled()
+      await this.createOrderButt.checkEnabled(true)
     } else {
-      await expect(this.createOrderButt).toBeDisabled()
+      await this.createOrderButt.checkEnabled(false)
     }
   }
 
   async statusButtonClick(): Promise<void> {
     await this.statusButton.click()
-    await expect(this.statusButton).toBeVisible()
+    await this.statusButton.checkVisible(true)
     await expect(this.orderTrack).toBeDisabled()
   }
 }
