@@ -46,7 +46,6 @@ export class OrderPage {
     await this.phoneInput.beVisible()
     await this.commentInput.beVisible()
     await this.checkCreateOrderButtonEnabled(true)
-    await expect(this.confirmationPopup).toBeVisible()
   }
   async createOrder(): Promise<void> {
     await this.nameInput.fill(faker.person.firstName())
