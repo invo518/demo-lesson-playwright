@@ -3,7 +3,6 @@ import { LoginPage } from '../pages/login-page'
 import { PASSWORD, USERNAME } from '../../config/env-data'
 import { faker } from '@faker-js/faker'
 
-
 test('Login test+order page components check', async ({ page }) => {
   const loginPage = new LoginPage(page)
   await loginPage.open()
@@ -85,5 +84,4 @@ test('can switch from EN to RU', async ({ page }) => {
   await loginPage.open()
   await loginPage.switchToRussian()
   await loginPage.switchToEnglish()
-
 })
