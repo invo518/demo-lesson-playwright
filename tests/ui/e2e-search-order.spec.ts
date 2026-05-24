@@ -7,6 +7,7 @@ const correctOrderId = 18150
 test('Not found page test', async ({ page }) => {
   const loginPage = new LoginPage(page)
   await loginPage.open()
+  await loginPage.verifyLoginFormElements()
   const orderPage = await loginPage.signIn(USERNAME, PASSWORD)
   const notFoundPage = await orderPage.checkOrderNotFound()
   await notFoundPage.checkVisible(true)

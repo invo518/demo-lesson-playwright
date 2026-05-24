@@ -1,12 +1,13 @@
 import { expect, Locator, Page } from '@playwright/test'
 import { faker } from '@faker-js/faker'
 import { Button } from '../atoms/Button'
-import { Input } from '../atoms/Fields input'
+import { Input } from '../atoms/Input'
 import { NotFoundPage } from './order-not found-page'
 import { OrderDetailsPage } from './order-details-page'
+import { BasePage } from './base-page'
+import { LoginPage } from './login-page'
 
-export class OrderPage {
-  readonly page: Page
+export class OrderPage extends BasePage {
   readonly title: Locator
   readonly statusButton: Button
   readonly createOrderButt: Button
@@ -22,7 +23,7 @@ export class OrderPage {
   readonly searchButton: Button
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
     this.title = page.locator('h2')
     this.statusButton = new Button(page.getByTestId('openStatusPopup-button'))
     this.createOrderButt = new Button(page.getByTestId('createOrder-button'))
@@ -31,7 +32,6 @@ export class OrderPage {
     this.commentInput = new Input(page.getByTestId('comment-input'))
     this.confirmationPopup = page.getByTestId('orderSuccessfullyCreated-popup')
     this.logOutBut = new Button(page.getByTestId('logout-button'))
-
     this.orderTrack = page.getByTestId('searchOrder-popup')
     //
     this.searchPopup = page.getByTestId('searchOrder-popup')
@@ -40,12 +40,13 @@ export class OrderPage {
   }
   async checkInnerComponents(): Promise<void> {
     await expect(this.title).toBeVisible()
-    await this.statusButton.checkVisible(true)
-    await this.createOrderButt.checkVisible(true)
-    await this.nameInput.beVisible()
-    await this.phoneInput.beVisible()
-    await this.commentInput.beVisible()
+    await this.statusButton.verifyEnabled(true)
+    await this.createOrderButt.verifyEnabled(true)
+    await this.nameInput.checkInputField()
+    await this.phoneInput.checkInputField()
+    await this.commentInput.checkInputField()
     await this.checkCreateOrderButtonEnabled(true)
+    await this.checkFooterVisible()
   }
   async createOrder(): Promise<void> {
     await this.nameInput.fill(faker.person.firstName())
@@ -68,15 +69,18 @@ export class OrderPage {
   }
   async checkCreateOrderButtonEnabled(enabled: boolean): Promise<void> {
     if (enabled) {
-      await this.createOrderButt.checkEnabled(true)
+      await this.createOrderButt.verifyEnabled(true)
     } else {
-      await this.createOrderButt.checkEnabled(false)
+      await this.createOrderButt.verifyDisable(false)
     }
   }
 
   async statusButtonClick(): Promise<void> {
     await this.statusButton.click()
-    await this.statusButton.checkVisible(true)
-    await expect(this.orderTrack).toBeDisabled()
+    await expect(this.searchPopup).toBeVisible()
+  }
+  async logout(): Promise<LoginPage> {
+    await this.logOutBut.click()
+    return new LoginPage(this.page)
   }
 }
